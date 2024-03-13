@@ -138,7 +138,7 @@ void BaseOverlay::drawActionLinesSpline(const OverlayDrawingCtx& ctx, const Base
         // detail gets dynamically reduced by increasing the timeStep,
         // at which is being sampled from the spline
         const float ratio = visibleDuration / ctx.visibleTime;
-        const float SampleCount = MaximumSamples * ratio;
+        const float SampleCount = MaximumSamples;//TODO: * ratio;
 
         const float timeStep = visibleDuration / SampleCount;
         
@@ -272,9 +272,9 @@ void BaseOverlay::DrawActionLines(const OverlayDrawingCtx& ctx) noexcept
     auto endIt = drawingScript->Actions().begin() + ctx.actionToIdx;
     ColoredLines.clear();
     
-    if(state.SplineMode)
+    if(state.SplineMode) //TODO: draw linear if no tangents used
     {
-        drawActionLinesSpline(ctx, state);
+        drawActionLinesSpline(ctx, state); //TODO: draw linear under spline as fallback
     }
     else 
     {

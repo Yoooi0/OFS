@@ -1404,9 +1404,13 @@ void OpenFunscripter::ScriptTimelineActionMoved(const FunscriptActionShouldMoveE
         }
         else {
             if (script->SelectionSize() == 1) {
+                FunscriptAction selectedAction = script->Selection()[0];
+                selectedAction.atS = ev->action.atS;
+                selectedAction.pos = ev->action.pos;
+
                 script->RemoveSelectedActions();
-                script->AddAction(ev->action);
-                script->SelectAction(ev->action);
+                script->AddAction(selectedAction);
+                script->SelectAction(selectedAction);
             }
         }
     }
@@ -1658,6 +1662,66 @@ void OpenFunscripter::Step() noexcept
                         if (ImGui::Button(TR(ADD_ACTION), ImVec2(-1.f, 0.f))) {
                             addEditAction(newActionPosition);
                         }
+                    }
+                }
+
+                FunscriptAction* selectedAction = const_cast<FunscriptAction*>(ActiveFunscript()->GetActionAtTime(player->CurrentTime(), 0.001f)); //TODO: make non const
+                if (selectedAction != nullptr) {
+                    int selectedTangentMode = selectedAction->tangentMode;
+                    int selectedWeightMode = selectedAction->weightMode;
+
+                    ImGui::TextUnformatted("Tangent Mode");
+                    ImGui::PushID("##TangentMode");
+                    if (ImGui::RadioButton("None", &selectedTangentMode, (int)HandleMode::None)) selectedAction->tangentMode = HandleMode::None; ImGui::SameLine();
+                    if (ImGui::RadioButton("In", &selectedTangentMode, (int)HandleMode::In)) selectedAction->tangentMode = HandleMode::In; ImGui::SameLine();
+                    if (ImGui::RadioButton("Out", &selectedTangentMode, (int)HandleMode::Out)) selectedAction->tangentMode = HandleMode::Out; ImGui::SameLine();
+                    if (ImGui::RadioButton("Both", &selectedTangentMode, (int)HandleMode::Both)) selectedAction->tangentMode = HandleMode::Both;
+                    ImGui::PopID();
+
+                    ImGui::TextUnformatted("Weight Mode");
+                    ImGui::PushID("##WeightMode");
+                    if (ImGui::RadioButton("None", &selectedWeightMode, (int)HandleMode::None)) selectedAction->weightMode = HandleMode::None; ImGui::SameLine();
+                    if (ImGui::RadioButton("In", &selectedWeightMode, (int)HandleMode::In)) selectedAction->weightMode = HandleMode::In; ImGui::SameLine();
+                    if (ImGui::RadioButton("Out", &selectedWeightMode, (int)HandleMode::Out)) selectedAction->weightMode = HandleMode::Out; ImGui::SameLine();
+                    if (ImGui::RadioButton("Both", &selectedWeightMode, (int)HandleMode::Both)) selectedAction->weightMode = HandleMode::Both;
+                    ImGui::PopID();
+
+                    bool showInTangent = selectedAction->tangentMode == HandleMode::In || selectedAction->tangentMode == HandleMode::Both;
+                    bool showOutTangent = selectedAction->tangentMode == HandleMode::Out || selectedAction->tangentMode == HandleMode::Both;
+                    bool showInWeight = showInTangent && (selectedAction->weightMode == HandleMode::In || selectedAction->weightMode == HandleMode::Both);
+                    bool showOutWeight = showOutTangent && (selectedAction->weightMode == HandleMode::Out || selectedAction->weightMode == HandleMode::Both);
+
+                    if (showInTangent || showInWeight)
+                        ImGui::Separator();
+                        
+                    if (showInTangent) {
+                        if (ImGui::Button("\xef\x80\xa1##InTangent", ImVec2(24, 0))) 
+                            selectedAction->inTangent = 0;
+                        ImGui::SameLine();
+                        ImGui::SliderFloat("In Tangent", &(selectedAction->inTangent), -0.999999, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                    }
+
+                    if (showInWeight) {
+                        if (ImGui::Button("\xef\x80\xa1##InWeight", ImVec2(24, 0))) 
+                            selectedAction->inWeight = 1 / 3.f;
+                        ImGui::SameLine();
+                        ImGui::SliderFloat("In Weight", &(selectedAction->inWeight), 0, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                    }
+                    
+                    if (showOutTangent || showOutWeight)
+                        ImGui::Separator();
+
+                    if (showOutTangent) {
+                        if (ImGui::Button("\xef\x80\xa1##OutTangent", ImVec2(24, 0))) 
+                            selectedAction->outTangent = 0;
+                        ImGui::SameLine();
+                        ImGui::SliderFloat("Out Tangent", &(selectedAction->outTangent), -0.999999, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                    }
+                    if (showOutWeight) {
+                        if (ImGui::Button("\xef\x80\xa1##OutWeight", ImVec2(24, 0))) 
+                            selectedAction->outWeight = 1 / 3.f;
+                        ImGui::SameLine();
+                        ImGui::SliderFloat("Out Weight", &(selectedAction->outWeight), 0, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
                     }
                 }
                 ImGui::End();

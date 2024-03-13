@@ -7,15 +7,27 @@
 
 #include "OFS_VectorSet.h"
 
+enum HandleMode : uint8_t {
+	None,
+	In,
+	Out,
+	Both
+};
+
 struct FunscriptAction
 {
 public:
 	// timestamp as floating point seconds
 	// instead of integer milliseconds
 	float atS;
+	float inTangent;
+	float outTangent;
+	float inWeight;
+	float outWeight;
+
 	int16_t pos;
-	uint8_t flags; // unused
-	uint8_t tag;
+	HandleMode tangentMode;
+	HandleMode weightMode;
 
 	template<typename S>
 	void serialize(S& s)
@@ -24,30 +36,32 @@ public:
 			[](S& s, FunscriptAction& o) {
 				s.value4b(o.atS);
 				s.value2b(o.pos);
-				s.value1b(o.flags);
-				s.value1b(o.tag);
+				s.value4b(o.inTangent);
+				s.value4b(o.inWeight);
+				s.value4b(o.outTangent);
+				s.value4b(o.outWeight);
+				s.value1b(o.tangentMode);
+				s.value1b(o.weightMode);
+				s.container1b(o.___reserved);
 			});
 	}
 
-	FunscriptAction() noexcept
-		: atS(std::numeric_limits<float>::min()), pos(std::numeric_limits<int16_t>::min()), flags(0), tag(0) {
-		static_assert(sizeof(FunscriptAction) == 8);
+	FunscriptAction() noexcept {
+		static_assert(sizeof(FunscriptAction) == 64); 
+
+		this->atS = std::numeric_limits<float>::min();
+		this->pos = std::numeric_limits<int16_t>::min();
+		this->inTangent = this->outTangent = 0;
+		this->inWeight = this->outWeight = 1 / 3.0f;
+		this->tangentMode = HandleMode::None;
+		this->weightMode = HandleMode::None;
 	}
 
 	FunscriptAction(float at, int32_t pos) noexcept
+		: FunscriptAction()
 	{
-		static_assert(sizeof(FunscriptAction) == 8);
 		this->atS = at;
 		this->pos = pos;
-		this->flags = 0;
-		this->tag = 0;
-	}
-
-	FunscriptAction(float at, int32_t pos, uint8_t tag) noexcept
-		: FunscriptAction(at, pos)
-	{
-		static_assert(sizeof(FunscriptAction) == 8);
-		this->tag = tag;
 	}
 
 	inline bool operator==(FunscriptAction b) const noexcept {
@@ -61,15 +75,22 @@ public:
 	inline bool operator<(FunscriptAction b) const noexcept {
 		return this->atS < b.atS;
 	}
-};
 
-struct FunscriptActionHashfunction
-{
-	inline std::size_t operator()(FunscriptAction s) const noexcept
-	{
-		static_assert(sizeof(FunscriptAction) == sizeof(int64_t));
-		return *(int64_t*)&s;
+	FunscriptAction copy() const noexcept {
+		FunscriptAction result(this->atS, this->pos);
+		
+		result.inTangent = this->inTangent;
+		result.outTangent = this->outTangent;
+		result.inWeight = this->inWeight;
+		result.outWeight = this->outWeight;
+		result.tangentMode = this->tangentMode;
+		result.weightMode = this->weightMode;
+
+		return result;
 	}
+
+private:
+	uint8_t ___reserved[38];
 };
 
 struct ActionLess
@@ -79,6 +100,5 @@ struct ActionLess
 		return a.atS < b.atS;
 	}
 };
-
 
 using FunscriptArray = vector_set<FunscriptAction, ActionLess>;
