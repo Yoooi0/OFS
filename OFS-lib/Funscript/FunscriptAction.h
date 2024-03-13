@@ -20,12 +20,12 @@ public:
 	// timestamp as floating point seconds
 	// instead of integer milliseconds
 	float atS;
+	int16_t pos;
+
 	float inTangent;
 	float outTangent;
 	float inWeight;
 	float outWeight;
-
-	int16_t pos;
 	HandleMode tangentMode;
 	HandleMode weightMode;
 
@@ -62,6 +62,19 @@ public:
 	{
 		this->atS = at;
 		this->pos = pos;
+	}
+		
+	FunscriptAction(float at, int32_t pos, float inTangent, float inWeight, float outTangent, float outWeight, HandleMode tangentMode, HandleMode weightMode) noexcept
+		: FunscriptAction()
+	{
+		this->atS = at;
+		this->pos = pos;
+		this->inTangent = inTangent;
+		this->outTangent = outTangent;
+		this->inWeight = inWeight;
+		this->outWeight = outWeight;
+		this->tangentMode = tangentMode;
+		this->weightMode = weightMode;
 	}
 
 	inline bool operator==(FunscriptAction b) const noexcept {

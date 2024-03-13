@@ -708,10 +708,33 @@ bool Funscript::Deserialize(const nlohmann::json& json, Funscript::Metadata* out
 	for (auto& action : jsonActions) 
 	{
 		float time = action["at"].get<double>() / 1000.0;
+		if (time < 0)
+			continue;
+
 		int32_t pos = action["pos"];
-		if (time >= 0.f) {
-			data.Actions.emplace(time, Util::Clamp(pos, 0, 100));
-		}
+
+		HandleMode tangentMode = HandleMode::None;
+		if (action.contains("tin") && action.contains("tout"))
+			tangentMode = HandleMode::Both;
+		else if (action.contains("tin"))
+			tangentMode = HandleMode::In;
+		else if (action.contains("tout"))
+			tangentMode = HandleMode::Out;
+
+		HandleMode weightMode = HandleMode::None;
+		if (action.contains("win") && action.contains("wout"))
+			weightMode = HandleMode::Both;
+		else if (action.contains("win"))
+			weightMode = HandleMode::In;
+		else if (action.contains("wout"))
+			weightMode = HandleMode::Out;
+
+		float inTangent = tangentMode == HandleMode::In || tangentMode == HandleMode::Both ? action["tin"].get<double>() : 0.f;
+		float outTangent = tangentMode == HandleMode::Out || tangentMode == HandleMode::Both ? action["tout"].get<double>() : 0.f;
+		float inWeight = weightMode == HandleMode::In || weightMode == HandleMode::Both ? action["win"].get<double>() : 1 / 3.f;
+		float outWeight = weightMode == HandleMode::Out || weightMode == HandleMode::Both ? action["wout"].get<double>() : 1 / 3.f;
+
+		data.Actions.emplace(time, Util::Clamp(pos, 0, 100), inTangent, inWeight, outTangent, outWeight, tangentMode, weightMode);
 	}
 
 	if(outMetadata)
@@ -873,6 +896,16 @@ void Funscript::Serialize(nlohmann::json& json, const FunscriptData& funscriptDa
 				{ "at",  ts },
 				{ "pos", Util::Clamp<int32_t>(action.pos, 0, 100) }
 			};
+
+			if (action.tangentMode == HandleMode::In || action.tangentMode == HandleMode::Both)
+				actionObj["tin"] = action.inTangent;
+			if (action.tangentMode == HandleMode::Out || action.tangentMode == HandleMode::Both)
+				actionObj["tout"] = action.outTangent;
+			if (action.weightMode == HandleMode::In || action.weightMode == HandleMode::Both)
+				actionObj["win"] = action.inWeight;
+			if (action.weightMode == HandleMode::Out || action.weightMode == HandleMode::Both)
+				actionObj["wout"] = action.inTangent;
+
 			jsonActions.emplace_back(std::move(actionObj));
 			lastTimestamp = ts;
 		}
