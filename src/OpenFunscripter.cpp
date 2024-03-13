@@ -1671,6 +1671,9 @@ void OpenFunscripter::Step() noexcept
                     : const_cast<FunscriptAction*>(ActiveFunscript()->GetActionAtTime(player->CurrentTime(), 0.001f));
                 
                 if (selectedAction != nullptr) {
+                    static bool linkTangents = false;
+                    static bool linkWeights = false;
+
                     int selectedTangentMode = selectedAction->tangentMode;
                     int selectedWeightMode = selectedAction->weightMode;
 
@@ -1679,7 +1682,8 @@ void OpenFunscripter::Step() noexcept
                     if (ImGui::RadioButton("None", &selectedTangentMode, (int)HandleMode::None)) selectedAction->tangentMode = HandleMode::None; ImGui::SameLine();
                     if (ImGui::RadioButton("In", &selectedTangentMode, (int)HandleMode::In)) selectedAction->tangentMode = HandleMode::In; ImGui::SameLine();
                     if (ImGui::RadioButton("Out", &selectedTangentMode, (int)HandleMode::Out)) selectedAction->tangentMode = HandleMode::Out; ImGui::SameLine();
-                    if (ImGui::RadioButton("Both", &selectedTangentMode, (int)HandleMode::Both)) selectedAction->tangentMode = HandleMode::Both;
+                    if (ImGui::RadioButton("Both", &selectedTangentMode, (int)HandleMode::Both)) selectedAction->tangentMode = HandleMode::Both; ImGui::SameLine();
+                    ImGui::Checkbox("Link", &linkTangents);
                     ImGui::PopID();
 
                     ImGui::TextUnformatted("Weight Mode");
@@ -1687,7 +1691,8 @@ void OpenFunscripter::Step() noexcept
                     if (ImGui::RadioButton("None", &selectedWeightMode, (int)HandleMode::None)) selectedAction->weightMode = HandleMode::None; ImGui::SameLine();
                     if (ImGui::RadioButton("In", &selectedWeightMode, (int)HandleMode::In)) selectedAction->weightMode = HandleMode::In; ImGui::SameLine();
                     if (ImGui::RadioButton("Out", &selectedWeightMode, (int)HandleMode::Out)) selectedAction->weightMode = HandleMode::Out; ImGui::SameLine();
-                    if (ImGui::RadioButton("Both", &selectedWeightMode, (int)HandleMode::Both)) selectedAction->weightMode = HandleMode::Both;
+                    if (ImGui::RadioButton("Both", &selectedWeightMode, (int)HandleMode::Both)) selectedAction->weightMode = HandleMode::Both; ImGui::SameLine();
+                    ImGui::Checkbox("Link", &linkWeights);
                     ImGui::PopID();
 
                     bool showInTangent = selectedAction->tangentMode == HandleMode::In || selectedAction->tangentMode == HandleMode::Both;
@@ -1702,14 +1707,18 @@ void OpenFunscripter::Step() noexcept
                         if (ImGui::Button("\xef\x80\xa1##InTangent", ImVec2(24, 0))) 
                             selectedAction->inTangent = 0;
                         ImGui::SameLine();
-                        ImGui::SliderFloat("In Tangent", &(selectedAction->inTangent), -0.999999, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        bool changed = ImGui::SliderFloat("In Tangent", &(selectedAction->inTangent), -0.999999, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        if (changed && linkTangents)
+                            selectedAction->outTangent = selectedAction->inTangent;
                     }
 
                     if (showInWeight) {
                         if (ImGui::Button("\xef\x80\xa1##InWeight", ImVec2(24, 0))) 
                             selectedAction->inWeight = 1 / 3.f;
                         ImGui::SameLine();
-                        ImGui::SliderFloat("In Weight", &(selectedAction->inWeight), 0, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        bool changed = ImGui::SliderFloat("In Weight", &(selectedAction->inWeight), 0, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        if (changed && linkWeights)
+                            selectedAction->outWeight = selectedAction->inWeight;
                     }
                     
                     if (showOutTangent || showOutWeight)
@@ -1719,13 +1728,17 @@ void OpenFunscripter::Step() noexcept
                         if (ImGui::Button("\xef\x80\xa1##OutTangent", ImVec2(24, 0))) 
                             selectedAction->outTangent = 0;
                         ImGui::SameLine();
-                        ImGui::SliderFloat("Out Tangent", &(selectedAction->outTangent), -0.999999, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        bool changed = ImGui::SliderFloat("Out Tangent", &(selectedAction->outTangent), -0.999999, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        if (changed && linkTangents)
+                            selectedAction->inTangent = selectedAction->outTangent;
                     }
                     if (showOutWeight) {
                         if (ImGui::Button("\xef\x80\xa1##OutWeight", ImVec2(24, 0))) 
                             selectedAction->outWeight = 1 / 3.f;
                         ImGui::SameLine();
-                        ImGui::SliderFloat("Out Weight", &(selectedAction->outWeight), 0, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        bool changed = ImGui::SliderFloat("Out Weight", &(selectedAction->outWeight), 0, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        if (changed && linkWeights)
+                            selectedAction->inWeight = selectedAction->outWeight;
                     }
                 }
                 ImGui::End();
