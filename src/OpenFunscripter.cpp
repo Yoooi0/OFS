@@ -1665,7 +1665,11 @@ void OpenFunscripter::Step() noexcept
                     }
                 }
 
-                FunscriptAction* selectedAction = const_cast<FunscriptAction*>(ActiveFunscript()->GetActionAtTime(player->CurrentTime(), 0.001f)); //TODO: make non const
+                //TODO: make non const
+                FunscriptAction* selectedAction = ActiveFunscript()->SelectionSize() == 1
+                    ? const_cast<FunscriptAction*>(ActiveFunscript()->GetActionSelectionAtIndex(0))
+                    : const_cast<FunscriptAction*>(ActiveFunscript()->GetActionAtTime(player->CurrentTime(), 0.001f));
+                
                 if (selectedAction != nullptr) {
                     int selectedTangentMode = selectedAction->tangentMode;
                     int selectedWeightMode = selectedAction->weightMode;

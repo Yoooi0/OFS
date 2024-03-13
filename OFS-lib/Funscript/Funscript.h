@@ -219,6 +219,8 @@ public:
 	inline const FunscriptAction* GetNextActionAhead(float time) noexcept { return getNextActionAhead(time); }
 	inline const FunscriptAction* GetPreviousActionBehind(float time) noexcept { return getPreviousActionBehind(time); }
 	inline const FunscriptAction* GetClosestAction(float time) noexcept { return getActionAtTime(data.Actions, time, std::numeric_limits<float>::max()); }
+	inline const FunscriptAction* GetClosestActionSelection(float time) noexcept { return getActionAtTime(data.Selection, time, std::numeric_limits<float>::max()); }
+	inline const FunscriptAction* GetActionSelectionAtIndex(uint32_t index) noexcept { return index >= 0 && index < SelectionSize() ? getAction(data.Selection[index]) : nullptr; }
 
 	float GetPositionAtTime(float time) noexcept;
 	
@@ -259,7 +261,6 @@ public:
 	inline bool HasSelection() const noexcept { return !data.Selection.empty(); }
 	inline uint32_t SelectionSize() const noexcept { return data.Selection.size(); }
 	inline void ClearSelection() noexcept { data.Selection.clear(); }
-	inline const FunscriptAction* GetClosestActionSelection(float time) noexcept { return getActionAtTime(data.Selection, time, std::numeric_limits<float>::max()); }
 	
 	void SetSelection(const FunscriptArray& actions) noexcept;
 	bool IsSelected(FunscriptAction action) noexcept;
