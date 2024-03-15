@@ -11,6 +11,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 option(OFS_PROFILE OFF)
 option(OFS_AVX OFF)
 
+if(MSVC)
+    add_compile_options("/ZI")
+    add_link_options("/INCREMENTAL")
+endif()
+
 if(WIN32)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     if(OFS_AVX) 
