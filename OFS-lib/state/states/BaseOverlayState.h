@@ -10,7 +10,6 @@ struct BaseOverlayState
     float MaxSpeedPerSecond = 400.f;
     bool ShowMaxSpeedHighlight = false;
     bool SyncLineEnable = false;
-    bool SplineMode = false; //TODO: remove
 
     inline static uint32_t RegisterStatic() noexcept
     {
@@ -28,5 +27,4 @@ REFL_TYPE(BaseOverlayState)
     REFL_FIELD(MaxSpeedPerSecond)
     REFL_FIELD(ShowMaxSpeedHighlight)
     REFL_FIELD(SyncLineEnable)
-    REFL_FIELD(SplineMode)
 REFL_END

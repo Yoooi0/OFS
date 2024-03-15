@@ -183,6 +183,15 @@ private:
 	void notifyActionsChanged(bool isEdit) noexcept; 
 	std::string currentPathRelative;
 	std::string title;
+
+	FunscriptSpline ScriptSpline;
+	inline const float Spline(float time) noexcept {
+		return ScriptSpline.Sample(data.Actions, time);
+	}
+
+	inline const float SplineClamped(float time) noexcept {
+		return Util::Clamp<float>(Spline(time) * 100.f, 0.f, 100.f);
+	}
 public:
 	Funscript() noexcept;
 	~Funscript() noexcept;
@@ -267,15 +276,6 @@ public:
 
 	void EqualizeSelection() noexcept;
 	void InvertSelection() noexcept;
-
-	FunscriptSpline ScriptSpline;
-	inline const float Spline(float time) noexcept {
-		return ScriptSpline.Sample(data.Actions, time);
-	}
-
-	inline const float SplineClamped(float time) noexcept {
-		return Util::Clamp<float>(Spline(time) * 100.f, 0.f, 100.f);
-	}
 };
 
 REFL_TYPE(Funscript::Metadata)

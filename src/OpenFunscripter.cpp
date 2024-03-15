@@ -1591,7 +1591,7 @@ void OpenFunscripter::Step() noexcept
 
             specialFunctions->ShowFunctionsWindow(&ofsState.showSpecialFunctions);
             undoSystem->ShowUndoRedoHistory(&ofsState.showHistory);
-            simulator.ShowSimulator(&ofsState.showSimulator, ActiveFunscript(), player->CurrentTime(), overlayState.SplineMode);
+            simulator.ShowSimulator(&ofsState.showSimulator, ActiveFunscript(), player->CurrentTime());
 
             if (ShowMetadataEditor) {
                 auto& projectState = LoadedProject->State();

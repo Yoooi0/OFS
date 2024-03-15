@@ -77,34 +77,6 @@ float Funscript::GetPositionAtTime(float time) noexcept
 	else if (data.Actions.size() == 1) return data.Actions[0].pos;
 
 	return SplineClamped(time);
-
-	//TODO: why not spline?
-	/*int i = 0;
-	auto it = data.Actions.lower_bound(FunscriptAction(time, 0));
-	if (it != data.Actions.end()) {
-		i = std::distance(data.Actions.begin(), it);
-		if (i > 0) --i;
-	}
-
-	for (; i < data.Actions.size()-1; i++) {
-		auto& action = data.Actions[i];
-		auto& next = data.Actions[i + 1];
-
-		if (time > action.atS && time < next.atS) {
-			// interpolate position
-			int32_t lastPos = action.pos;
-			float diff = next.pos - action.pos;
-			float progress = (float)(time - action.atS) / (next.atS - action.atS);
-			
-			float interp = lastPos + (progress * (float)diff);
-			return interp;
-		}
-		else if (action.atS == time) {
-			return action.pos;
-		}
-	}
-	
-	return data.Actions.back().pos;*/
 }
 
 void Funscript::AddMultipleActions(const FunscriptArray& actions) noexcept

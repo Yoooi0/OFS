@@ -98,7 +98,7 @@ void ScriptSimulator::CenterSimulator() noexcept
     state.P2 = state.P1 + ImVec2(0.f, default_len);
 }
 
-void ScriptSimulator::ShowSimulator(bool* open, std::shared_ptr<Funscript>& activeScript, float currentTime, bool splineMode) noexcept
+void ScriptSimulator::ShowSimulator(bool* open, std::shared_ptr<Funscript>& activeScript, float currentTime) noexcept
 {
     if (!*open) return;
     OFS_PROFILE(__FUNCTION__);
@@ -109,9 +109,7 @@ void ScriptSimulator::ShowSimulator(bool* open, std::shared_ptr<Funscript>& acti
         positionOverride = -1.f;
     }
     else {
-        currentPos = splineMode 
-            ? activeScript->SplineClamped(currentTime) 
-            : activeScript->GetPositionAtTime(currentTime);
+        currentPos = activeScript->GetPositionAtTime(currentTime);
     }
 
     if (EnableVanilla) {

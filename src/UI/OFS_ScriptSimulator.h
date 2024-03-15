@@ -28,6 +28,6 @@ public:
 
 	void Init() noexcept;
 	void CenterSimulator() noexcept;
-	void ShowSimulator(bool* open, std::shared_ptr<class Funscript>& activeScript, float currentTime, bool splineMode) noexcept;
+	void ShowSimulator(bool* open, std::shared_ptr<class Funscript>& activeScript, float currentTime) noexcept;
 };
 
