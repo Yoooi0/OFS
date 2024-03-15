@@ -10,6 +10,7 @@ env:
 
 jobs:
   macos:
+    if: false
     runs-on: macos-latest
           
     steps:
@@ -37,6 +38,7 @@ jobs:
         cmake --build . --config $BUILD_TYPE --target "OpenFunscripter"
     
   linux:
+    if: false
     runs-on: ubuntu-20.04
     
     steps:
@@ -63,8 +65,7 @@ jobs:
       shell: bash
       run: |
         cmake --build . --config $BUILD_TYPE --target "OpenFunscripter"
-
-    
+ 
   windows:
     runs-on: windows-2019
 
@@ -73,9 +74,6 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-depth: 0
-    
-    #- name: Git LFS
-    #  run: git lfs pull
     
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
