@@ -4,7 +4,7 @@
 #include <vector>
 #include "glm/gtx/spline.hpp"
 #include "glm/gtc/epsilon.hpp"
-
+#include "glm/gtc/constants.hpp"
 
 class FunscriptSpline
 {
@@ -42,8 +42,8 @@ private:
 		float dx = x1 - x0;
 		float dy = y1 - y0;
 
-		m0 = tanf(IM_PI / 2 * glm::clamp(m0, -0.999f, 0.999f));
-		m1 = tanf(IM_PI / 2 * glm::clamp(m1, -0.999f, 0.999f));
+		m0 = glm::tan(glm::pi<float>() / 2 * glm::clamp(m0, -0.999f, 0.999f));
+		m1 = glm::tan(glm::pi<float>() / 2 * glm::clamp(m1, -0.999f, 0.999f));
 
 		w0 = glm::clamp(w0, 0.f, 0.999f);
 		w1 = glm::clamp(w1, 0.f, 0.999f);
@@ -68,7 +68,7 @@ private:
 				float ts2 = ts * ts;
 
 				float fg = 3 * ts2 * t * w0 + 3 * ts * t2 * w1s + t2 * t - tx;
-				if (abs(fg) < FLT_EPSILON * 10)
+				if (glm::abs(fg) < FLT_EPSILON * 10)
 					break;
 
 				// third order householder method
