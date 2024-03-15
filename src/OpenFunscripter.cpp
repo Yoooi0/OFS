@@ -30,7 +30,6 @@
 // TODO: extend "range extender" functionality ( only extend bottom/top, range reducer )
 // TODO: render simulator relative to video position & zoom
 // TODO: make speed coloring configurable
-// TODO: OFS_ScriptTimeline selections cause alot of unnecessary overdraw
 
 OpenFunscripter* OpenFunscripter::ptr = nullptr;
 static constexpr const char* GlslVersion = "#version 330 core";

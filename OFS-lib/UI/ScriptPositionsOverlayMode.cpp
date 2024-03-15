@@ -154,40 +154,51 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
         ctx.drawList->_Path.Size = tmpSize;
         ctx.drawList->PathStroke(color, false, width);
     };
+    auto drawLine = [](const OverlayDrawingCtx& ctx, FunscriptAction startAction, FunscriptAction endAction, uint32_t color, float width, bool background = true) noexcept {
+        auto p1 = BaseOverlay::GetPointForAction(ctx, startAction);
+        auto p2 = BaseOverlay::GetPointForAction(ctx, endAction);
+        ctx.drawList->AddLine(p1, p2, color, width);
+        ColoredLines.emplace_back(std::move(BaseOverlay::ColoredLine{ p1, p2, color }));
+    };
 
     auto& drawingScript = ctx.DrawingScript();
     {
         auto startIt = drawingScript->Actions().begin() + ctx.actionFromIdx;
         auto endIt = drawingScript->Actions().begin() + ctx.actionToIdx;
 
+        auto selectionStartIt = drawingScript->Selection().begin() + ctx.selectionFromIdx;
+        auto selectionEndIt = drawingScript->Selection().begin() + ctx.selectionToIdx;
+
+        bool prevActionSelected = false;
         const FunscriptAction* prevAction = nullptr;
-        for (; startIt != endIt; ++startIt) {
+        while (startIt != endIt) {
             auto& action = *startIt;
-            auto p1 = BaseOverlay::GetPointForAction(ctx, action);
 
+            bool actionSelected = drawingScript->HasSelection() && selectionStartIt != selectionEndIt && action == *selectionStartIt;
             if (prevAction != nullptr) {
-                ImColor speedColor;
-                getActionLineColor(&speedColor, FunscriptHeatmap::LineColors, action, *prevAction, state);
-                drawSpline(ctx, *prevAction, action, ImGui::ColorConvertFloat4ToU32(speedColor), 3.f);
-            }
-            prevAction = &action;
-        }
-    }
+                uint32_t color;
 
-    if(drawingScript->HasSelection())
-    {
-        auto startIt = drawingScript->Selection().begin() + ctx.selectionFromIdx;
-        auto endIt = drawingScript->Selection().begin() + ctx.selectionToIdx;
-        const FunscriptAction* prevAction = nullptr;
-        for (; startIt != endIt; ++startIt) {
-            auto&& action = *startIt;
+                if (actionSelected && prevActionSelected) {
+                    color = SelectedLineColor;
+                }
+                else {
+                    ImColor speedColor;
+                    getActionLineColor(&speedColor, FunscriptHeatmap::LineColors, action, *prevAction, state);
+                    color = ImGui::ColorConvertFloat4ToU32(speedColor);
+                }
 
-            if (prevAction != nullptr) {
-                // draw highlight line
-                drawSpline(ctx, *prevAction, action, SelectedLineColor, 3.f, false);
+                if (prevAction->tangentMode != HandleMode::None || action.tangentMode != HandleMode::None)
+                    drawSpline(ctx, *prevAction, action, color, 3.f);
+                else
+                    drawLine(ctx, *prevAction, action, color, 3.f);
             }
 
             prevAction = &action;
+            prevActionSelected = actionSelected;
+
+            ++startIt;
+            if (actionSelected)
+                ++selectionStartIt;
         }
     }
 }
