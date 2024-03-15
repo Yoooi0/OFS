@@ -11,8 +11,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 option(OFS_PROFILE OFF)
 option(OFS_AVX OFF)
 
-if(MSVC)
-    add_compile_options("/ZI")
+if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options("/Zi")
     add_link_options("/INCREMENTAL")
 endif()
 
