@@ -12,7 +12,7 @@ option(OFS_PROFILE OFF)
 option(OFS_AVX OFF)
 
 if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_compile_options("/Zi")
+    add_compile_options("/ZI")
     add_link_options("/INCREMENTAL")
 endif()
 
