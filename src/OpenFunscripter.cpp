@@ -1,4 +1,4 @@
-﻿#include "OpenFunscripter.h"
+#include "OpenFunscripter.h"
 #include "OFS_Util.h"
 #include "OFS_Profiling.h"
 #include "OFS_ImGui.h"
@@ -1703,19 +1703,23 @@ void OpenFunscripter::Step() noexcept
                         ImGui::Separator();
                         
                     if (showInTangent) {
-                        if (ImGui::Button("\xef\x80\xa1##InTangent", ImVec2(24, 0))) 
+                        bool changed = ImGui::Button("\xef\x80\xa1##InTangent", ImVec2(24, 0));
+                        if (changed)
                             selectedAction->inTangent = 0;
+
                         ImGui::SameLine();
-                        bool changed = ImGui::SliderFloat("In Tangent", &(selectedAction->inTangent), -0.999999, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        changed |= ImGui::SliderFloat("In Tangent", &(selectedAction->inTangent), -0.999999, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
                         if (changed && linkTangents)
                             selectedAction->outTangent = selectedAction->inTangent;
                     }
 
                     if (showInWeight) {
-                        if (ImGui::Button("\xef\x80\xa1##InWeight", ImVec2(24, 0))) 
+                        bool changed = ImGui::Button("\xef\x80\xa1##InWeight", ImVec2(24, 0));
+                        if (changed) 
                             selectedAction->inWeight = 1 / 3.f;
+
                         ImGui::SameLine();
-                        bool changed = ImGui::SliderFloat("In Weight", &(selectedAction->inWeight), 0, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        changed |= ImGui::SliderFloat("In Weight", &(selectedAction->inWeight), 0, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
                         if (changed && linkWeights)
                             selectedAction->outWeight = selectedAction->inWeight;
                     }
@@ -1724,18 +1728,22 @@ void OpenFunscripter::Step() noexcept
                         ImGui::Separator();
 
                     if (showOutTangent) {
-                        if (ImGui::Button("\xef\x80\xa1##OutTangent", ImVec2(24, 0))) 
+                        bool changed = ImGui::Button("\xef\x80\xa1##OutTangent", ImVec2(24, 0));
+                        if (changed) 
                             selectedAction->outTangent = 0;
+
                         ImGui::SameLine();
-                        bool changed = ImGui::SliderFloat("Out Tangent", &(selectedAction->outTangent), -0.999999, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        changed |= ImGui::SliderFloat("Out Tangent", &(selectedAction->outTangent), -0.999999, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
                         if (changed && linkTangents)
                             selectedAction->inTangent = selectedAction->outTangent;
                     }
                     if (showOutWeight) {
-                        if (ImGui::Button("\xef\x80\xa1##OutWeight", ImVec2(24, 0))) 
+                        bool changed = ImGui::Button("\xef\x80\xa1##OutWeight", ImVec2(24, 0));
+                        if (changed) 
                             selectedAction->outWeight = 1 / 3.f;
+
                         ImGui::SameLine();
-                        bool changed = ImGui::SliderFloat("Out Weight", &(selectedAction->outWeight), 0, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
+                        changed |= ImGui::SliderFloat("Out Weight", &(selectedAction->outWeight), 0, 0.999999, "%f", ImGuiSliderFlags_AlwaysClamp);
                         if (changed && linkWeights)
                             selectedAction->inWeight = selectedAction->outWeight;
                     }
