@@ -100,7 +100,11 @@ private:
 	bool funscriptChanged = false; // used to fire only one event every frame a change occurs
 	bool unsavedEdits = false; // used to track if the script has unsaved changes
 	bool selectionChanged = false;
-	FunscriptData data;
+    FunscriptData data;
+    FunscriptSpline scriptSpline;
+    std::string currentPathRelative;
+    std::string title;
+
 
 	void checkForInvalidatedActions() noexcept;
 
@@ -181,17 +185,6 @@ private:
 	static void saveMetadata(nlohmann::json& outMetadataObj, const Funscript::Metadata& inMetadata) noexcept;
 
 	void notifyActionsChanged(bool isEdit) noexcept; 
-	std::string currentPathRelative;
-	std::string title;
-
-	FunscriptSpline ScriptSpline;
-	inline const float Spline(float time) noexcept {
-		return ScriptSpline.Sample(data.Actions, time);
-	}
-
-	inline const float SplineClamped(float time) noexcept {
-		return Util::Clamp<float>(Spline(time) * 100.f, 0.f, 100.f);
-	}
 public:
 	Funscript() noexcept;
 	~Funscript() noexcept;

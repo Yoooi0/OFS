@@ -76,7 +76,7 @@ float Funscript::GetPositionAtTime(float time) noexcept
 	if (data.Actions.size() == 0) {	return 0; } 
 	else if (data.Actions.size() == 1) return data.Actions[0].pos;
 
-	return SplineClamped(time);
+	return Util::Clamp<float>(scriptSpline.Sample(data.Actions, time) * 100.f, 0.f, 100.f);
 }
 
 void Funscript::AddMultipleActions(const FunscriptArray& actions) noexcept
