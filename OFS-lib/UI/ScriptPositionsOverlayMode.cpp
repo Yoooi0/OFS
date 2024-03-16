@@ -105,6 +105,7 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
         auto putPoint = [getPointForTimePos](auto& ctx, float time) noexcept {
             float pos = ctx.DrawingScript()->GetPositionAtTime(time);
             ctx.drawList->PathLineTo(getPointForTimePos(ctx, time, pos));
+            return pos;
         };
 
         ctx.drawList->PathClear();
@@ -141,18 +142,39 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
         const float SampleCount = MaximumSamples;//TODO: * ratio;
 
         const float timeStep = visibleDuration / SampleCount;
+
+        float clipStart = FP_NAN;
+        float clipEnd = FP_NAN;
         
         putPoint(ctx, currentTime);
         currentTime += timeStep;
         while (currentTime < endTime) {
-            putPoint(ctx, currentTime);
+            float pos = putPoint(ctx, currentTime);
+
+            if (pos == 100 || pos == 0) {
+                if (clipStart == FP_NAN)
+                    clipStart = currentTime;
+                else
+                    clipEnd = currentTime;
+            }
+
             currentTime += timeStep;
         }
+
         putPoint(ctx, endAction.atS);
         auto tmpSize = ctx.drawList->_Path.Size;
         ctx.drawList->PathStroke(IM_COL32_BLACK, false, 7.f);
         ctx.drawList->_Path.Size = tmpSize;
         ctx.drawList->PathStroke(color, false, width);
+
+        if (clipStart != clipEnd && clipStart != FP_NAN) {
+            ctx.drawList->PathClear();
+            putPoint(ctx, clipStart);
+            putPoint(ctx, clipEnd);
+            ctx.drawList->PathStroke(IM_COL32_BLACK, false, 7.f);
+            ctx.drawList->_Path.Size = 2;
+            ctx.drawList->PathStroke(IM_COL32(255, 0, 255, 255), false, width);
+        }
     };
     auto drawLine = [](const OverlayDrawingCtx& ctx, FunscriptAction startAction, FunscriptAction endAction, uint32_t color, float width, bool background = true) noexcept {
         auto p1 = BaseOverlay::GetPointForAction(ctx, startAction);
