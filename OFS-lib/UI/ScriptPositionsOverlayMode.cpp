@@ -143,8 +143,8 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
 
         const float timeStep = visibleDuration / SampleCount;
 
-        float clipStart = FP_NAN;
-        float clipEnd = FP_NAN;
+        float clipStart = NAN;
+        float clipEnd = NAN;
         
         putPoint(ctx, currentTime);
         currentTime += timeStep;
@@ -152,7 +152,7 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
             float pos = putPoint(ctx, currentTime);
 
             if (pos == 100 || pos == 0) {
-                if (clipStart == FP_NAN)
+                if (isnan(clipStart))
                     clipStart = currentTime;
                 else
                     clipEnd = currentTime;
@@ -167,7 +167,7 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
         ctx.drawList->_Path.Size = tmpSize;
         ctx.drawList->PathStroke(color, false, width);
 
-        if (clipStart != clipEnd && clipStart != FP_NAN) {
+        if (clipStart != clipEnd && !isnan(clipStart)) {
             ctx.drawList->PathClear();
             putPoint(ctx, clipStart);
             putPoint(ctx, clipEnd);
