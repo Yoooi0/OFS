@@ -46,7 +46,6 @@ protected:
 	static uint32_t StateHandle;
 
 	static void drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverlayState& state) noexcept;
-	static void drawActionLinesLinear(const OverlayDrawingCtx& ctx, const BaseOverlayState& state) noexcept;
 
 public:
 	inline static BaseOverlayState& State() noexcept
