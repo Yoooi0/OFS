@@ -92,6 +92,7 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
     auto drawSpline = [](const OverlayDrawingCtx& ctx, FunscriptAction startAction, FunscriptAction endAction, uint32_t color, float width, bool background = true) noexcept
     {
         constexpr float SamplesPerTwothousandPixels = 150.f;
+        constexpr int MaxClipSegmentsPerSpline = 2;
         const float MaximumSamples = SamplesPerTwothousandPixels * (ctx.canvasSize.x / 2000.f);
 
         auto getPointForTimePos = [](const OverlayDrawingCtx& ctx, float time, float pos) noexcept {
@@ -143,8 +144,9 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
 
         const float timeStep = visibleDuration / SampleCount;
 
-        float clipStart = NAN;
-        float clipEnd = NAN;
+        int clipIndex = 0;
+        float clipStart[MaxClipSegmentsPerSpline] = { NAN, NAN };
+        float clipEnd[MaxClipSegmentsPerSpline] = { NAN, NAN };
         
         putPoint(ctx, currentTime);
         currentTime += timeStep;
@@ -152,10 +154,15 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
             float pos = putPoint(ctx, currentTime);
 
             if (pos == 100 || pos == 0) {
-                if (isnan(clipStart))
-                    clipStart = currentTime;
-                else
-                    clipEnd = currentTime;
+                if (isnan(clipStart[clipIndex])) {
+                    clipStart[clipIndex] = currentTime;
+                }
+                else {
+                    clipEnd[clipIndex] = currentTime;
+                }
+            }
+            else if (clipIndex < MaxClipSegmentsPerSpline && !isnan(clipStart[clipIndex]) && !isnan(clipEnd[clipIndex])) {
+                clipIndex++;
             }
 
             currentTime += timeStep;
@@ -167,13 +174,17 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
         ctx.drawList->_Path.Size = tmpSize;
         ctx.drawList->PathStroke(color, false, width);
 
-        if (clipStart != clipEnd && !isnan(clipStart)) {
-            ctx.drawList->PathClear();
-            putPoint(ctx, clipStart);
-            putPoint(ctx, clipEnd);
-            ctx.drawList->PathStroke(IM_COL32_BLACK, false, 7.f);
-            ctx.drawList->_Path.Size = 2;
-            ctx.drawList->PathStroke(IM_COL32(255, 0, 255, 255), false, width);
+        while (clipIndex >= 0) {
+            if (clipStart[clipIndex] != clipEnd[clipIndex] && !isnan(clipStart[clipIndex])) {
+                ctx.drawList->PathClear();
+                putPoint(ctx, clipStart[clipIndex]);
+                putPoint(ctx, clipEnd[clipIndex]);
+                ctx.drawList->PathStroke(IM_COL32_BLACK, false, 7.f);
+                ctx.drawList->_Path.Size = 2;
+                ctx.drawList->PathStroke(IM_COL32(255, 0, 255, 255), false, width);
+            }
+
+            clipIndex--;
         }
     };
     auto drawLine = [](const OverlayDrawingCtx& ctx, FunscriptAction startAction, FunscriptAction endAction, uint32_t color, float width, bool background = true) noexcept {
