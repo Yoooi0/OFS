@@ -91,7 +91,7 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
 {
     auto drawSpline = [](const OverlayDrawingCtx& ctx, FunscriptAction startAction, FunscriptAction endAction, uint32_t color, float width, bool background = true) noexcept
     {
-        constexpr float SamplesPerTwothousandPixels = 150.f;
+        constexpr float SamplesPerTwothousandPixels = 1000.f;
         constexpr int MaxClipSegmentsPerSpline = 2;
         const float MaximumSamples = SamplesPerTwothousandPixels * (ctx.canvasSize.x / 2000.f);
 
@@ -140,7 +140,7 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
         // detail gets dynamically reduced by increasing the timeStep,
         // at which is being sampled from the spline
         const float ratio = visibleDuration / ctx.visibleTime;
-        const float SampleCount = MaximumSamples;//TODO: * ratio;
+        const float SampleCount = MaximumSamples * ratio;
 
         const float timeStep = visibleDuration / SampleCount;
 
@@ -220,7 +220,7 @@ void BaseOverlay::drawActionLines(const OverlayDrawingCtx& ctx, const BaseOverla
                     color = ImGui::ColorConvertFloat4ToU32(speedColor);
                 }
 
-                if (prevAction->tangentMode != HandleMode::None || action.tangentMode != HandleMode::None)
+                if (prevAction->tangentMode != HandleMode::None || action.tangentMode != HandleMode::None && action.atS - prevAction->atS >= 0.01f)
                     drawSpline(ctx, *prevAction, action, color, 3.f);
                 else
                     drawLine(ctx, *prevAction, action, color, 3.f);
