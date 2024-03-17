@@ -178,7 +178,14 @@ private:
 	void moveActionsPosition(std::vector<FunscriptAction*> moving, int32_t posOffset);
 	inline void sortSelection() noexcept { sortActions(data.Selection); }
 	inline void sortActions(FunscriptArray& actions) noexcept { std::sort(actions.begin(), actions.end()); }
-	inline void addAction(FunscriptArray& actions, FunscriptAction newAction) noexcept { actions.emplace(newAction); notifyActionsChanged(true); }
+    inline bool addAction(FunscriptArray& actions, FunscriptAction newAction) noexcept
+    {
+        bool result = actions.emplace(newAction);
+        if (result)
+			notifyActionsChanged(true);
+        return result;
+    }
+
 	inline void notifySelectionChanged() noexcept { selectionChanged = true; }
 
 	static void loadMetadata(const nlohmann::json& metadataObj, Funscript::Metadata& outMetadata) noexcept;
@@ -226,7 +233,7 @@ public:
 
 	float GetPositionAtTime(float time) noexcept;
 	
-	inline void AddAction(FunscriptAction newAction) noexcept { addAction(data.Actions, newAction); }
+	inline bool AddAction(FunscriptAction newAction) noexcept { return addAction(data.Actions, newAction); }
 	void AddMultipleActions(const FunscriptArray& actions) noexcept;
 
 	bool EditAction(FunscriptAction oldAction, FunscriptAction newAction) noexcept;

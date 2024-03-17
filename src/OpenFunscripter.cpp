@@ -1408,7 +1408,9 @@ void OpenFunscripter::ScriptTimelineActionMoved(const FunscriptActionShouldMoveE
                 selectedAction.pos = ev->action.pos;
 
                 script->RemoveSelectedActions();
-                script->AddAction(selectedAction);
+                while (!script->AddAction(selectedAction)) //TODO: better way to fix?
+                    selectedAction.atS += FLT_EPSILON * 10;
+
                 script->SelectAction(selectedAction);
             }
         }
